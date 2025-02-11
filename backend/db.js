@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-mongoose.connect("")
+mongoose.connect(process.env.MONGODB_URL);
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -27,25 +27,26 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    maxLength: 50
-  }
+    maxLength: 50,
+  },
 });
 
 const accountSchema = new mongoose.Schema({
-  userId:{
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    ref: "User",
+    required: true,
   },
   balance: {
     type: Number,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
-const User = mongoose.model('User', userSchema);
-const Account = mongoose.model('Account', accountSchema);
+const User = mongoose.model("User", userSchema);
+const Account = mongoose.model("Account", accountSchema);
 
 module.exports = {
-  User, Account
-}
+  User,
+  Account,
+};

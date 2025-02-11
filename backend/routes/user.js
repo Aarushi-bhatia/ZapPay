@@ -2,9 +2,10 @@ const express = require("express");
 
 const router = express.Router();
 const zod = require("zod");
-const { User } = require("../db");
+const { User, Account } = require("../db");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config");
+const { authMiddleware } = require("../middleware");
 
 const signupBody = zod.object({
   username: zod.string().email(),
@@ -17,7 +18,7 @@ router.post("/signup", async (req, res) => {
   const { success } = signupBody.safeParse(req.body);
   if (!success) {
     return res.status(411).json({
-      message: "Email already taken/Incorrect inputs",
+      message: "Incorrect inputs",
     });
   }
 
@@ -27,7 +28,7 @@ router.post("/signup", async (req, res) => {
 
   if (existingUser) {
     return res.status(411).json({
-      message: "Email already taken/incorrect inputs",
+      message: "Email already taken",
     });
   }
 
@@ -48,7 +49,7 @@ router.post("/signup", async (req, res) => {
     {
       userId,
     },
-    JWT_SECRET
+    process.env.JWT_SECRET
   );
 
   res.json({
@@ -66,7 +67,7 @@ router.post("/signin", async (req, res) => {
   const { success } = signinBody.safeParse(req.body);
   if (!success) {
     return res.status(411).json({
-      message: "Email already token/incorrect inputs",
+      message: "incorrect inputs",
     });
   }
 
@@ -80,7 +81,7 @@ router.post("/signin", async (req, res) => {
       {
         userId: user._id,
       },
-      JWT_SECRET
+      process.env.JWT_SECRET
     );
 
     res.json({
@@ -103,7 +104,7 @@ const updateBody = zod.object({
 router.put("/", authMiddleware, async (req, res) => {
   const { success } = updateBody.safeParse(req.body);
   if (!success) {
-    req.status(411).json({
+    res.status(411).json({
       message: "Error while updating information",
     });
   }
@@ -137,7 +138,7 @@ router.get("/bulk", async (req, res) => {
     user: users.map((user) => ({
       username: user.username,
       firstName: user.firstName,
-      username: user.username,
+      lastName: user.lastName,
       _id: user._id,
     })),
   });
